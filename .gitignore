@@ -1,0 +1,5 @@
+src/*.o
+src/.project
+src/.cproject
+src/.settings
+src/xvcd
