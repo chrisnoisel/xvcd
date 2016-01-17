@@ -7,7 +7,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include "gpio.h"
+//#include "gpio.h"
+#include "serial_jtag.h"
 
 static int jtag_state;
 static int verbose;
@@ -78,7 +79,7 @@ static int sread(int fd, void *target, int len)
 //   after going test_logic_reset. This ensures that one
 //   client can't disrupt the other client's IR or state.
 //
-int handle_data(int fd)
+int handle_data(int fd, int jtag)
 {
 	int i;
 	int seen_tlr = 0;
@@ -156,11 +157,10 @@ int handle_data(int fd)
 				
 				int tms = !!(buffer[i/8] & (1<<(i&7)));
 				int tdi = !!(buffer[nr_bytes + i/8] & (1<<(i&7)));
-				result[i / 8] |= gpio_get(GPIO_TDO) << (i&7);
-				gpio_set(GPIO_TMS, tms);
-				gpio_set(GPIO_TDI, tdi);
-				gpio_set(GPIO_TCK, 1);
-				gpio_set(GPIO_TCK, 0);
+				result[i / 8] |= get_TDO(jtag) << (i&7);
+				set_TMS(jtag, tms);
+				set_TDI(jtag, tdi);
+				pulse_TCK(jtag);
 				
 				//
 				// Track the state.
@@ -207,7 +207,7 @@ int main(int argc, char **argv)
 	// re-setting alternate functions, making input/outputs).
 	//
 	
-	gpio_init();
+	int jtag = serial_jtag_open("/dev/ttyUSB0");
 	
 	//
 	// Listen on port 2542.
@@ -294,7 +294,7 @@ int main(int argc, char **argv)
 				//
 				// Otherwise, do work.
 				//
-				else if (handle_data(fd))
+				else if (handle_data(fd, jtag))
 				{
 					//
 					// Close connection when required.
@@ -325,7 +325,7 @@ int main(int argc, char **argv)
 	// Un-map IOs.
 	//
 	
-	gpio_close();
+	serial_jtag_close(jtag);
 	
 	return 0;
 }

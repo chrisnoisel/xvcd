@@ -10,14 +10,22 @@
 
 int main(int argc, char **argv)
 {
-	struct serial_jtag jtag;
-	serial_jtag_open(&jtag, "/dev/ttyUSB0");
+	int jtag;
+	jtag = serial_jtag_open("/dev/ttyUSB0");
 
 	for(;;)
 	{
-		pulse_TCK(&jtag);
+		printf("%d\n", get_TDO(jtag));
+
+		set_TDI(jtag, 1);
+		set_TMS(jtag, 1);
+
+		pulse_TCK(jtag);
+
+		set_TDI(jtag, 0);
+		set_TMS(jtag, 0);
 	}
 
-	serial_jtag_close(&jtag);
+	serial_jtag_close(jtag);
 	return 0;
 }

@@ -9,25 +9,27 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <termios.h>
 #include "serial_jtag.h"
 
 
 #define BAUDRATE B921600
 // CP2102's max speed is B921600
-// gives ~77kHz signal
+// gives a ~77kHz signal
 
 #define PULSE 0xf0
 // 1 1111 0000
 
-int serial_jtag_open(struct serial_jtag *dev, char *device)
+int serial_jtag_open(char *device)
 {
-	dev->fd = open(device, O_RDWR|O_NOCTTY);
+	int fd;
+	fd = open(device, O_RDWR|O_NOCTTY);
 
-	if(dev->fd != -1)
+	if(fd != -1)
 	{
 		struct termios settings;
 
-		tcgetattr(dev->fd, &settings);
+		tcgetattr(fd, &settings);
 
 		cfsetispeed(&settings, BAUDRATE);
 		cfsetospeed(&settings, BAUDRATE);
@@ -35,44 +37,44 @@ int serial_jtag_open(struct serial_jtag *dev, char *device)
 		settings.c_cflag &= ~PARENB; // no parity bit
 		settings.c_cflag &= ~CSTOPB; // 1 stop bit
 		settings.c_cflag &= ~CSIZE; /* Clears the Mask       */
-		settings.c_cflag |=  CS7;   /* Set the data bits = 8 */
+		settings.c_cflag |=  CS7;   /* Set the data bits = 7 */
 		settings.c_cflag &= ~CRTSCTS;
 		settings.c_cflag |= CREAD | CLOCAL;
 		settings.c_iflag &= ~(IXON | IXOFF | IXANY);
 		settings.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
 
-		tcsetattr(dev->fd, TCSANOW, &settings);
+		tcsetattr(fd, TCSANOW, &settings);
 	}
 
-	return dev->fd;
+	return fd;
 }
 
-void serial_jtag_close(struct serial_jtag *dev)
+void serial_jtag_close(int fd)
 {
-	close(dev->fd);
+	close(fd);
 }
 
-int set_TDI(struct serial_jtag *dev, int state)
+int set_TDI(int fd, int state)
 {
 	int flag = TIOCM_RTS;
-	return ioctl(dev->fd, state ? TIOCMBIS : TIOCMBIC, &flag);
+	return ioctl(fd, state ? TIOCMBIS : TIOCMBIC, &flag);
 }
 
-int set_TMS(struct serial_jtag *dev, int state)
+int set_TMS(int fd, int state)
 {
 	int flag = TIOCM_DTR;
-	return ioctl(dev->fd, state ? TIOCMBIS : TIOCMBIC, &flag);
+	return ioctl(fd, state ? TIOCMBIS : TIOCMBIC, &flag);
 }
 
-int pulse_TCK(struct serial_jtag *dev)
+int pulse_TCK(int fd)
 {
 	char write_buffer[] = {PULSE};
-	return (int) write(dev->fd, write_buffer, sizeof(write_buffer));
+	return (int) write(fd, write_buffer, sizeof(write_buffer));
 }
 
-int get_TDO(struct serial_jtag *dev)
+int get_TDO(int fd)
 {
 	int bits;
-	ioctl(dev->fd, TIOCMGET, &bits);
+	ioctl(fd, TIOCMGET, &bits);
 	return bits & TIOCM_CTS;
 }

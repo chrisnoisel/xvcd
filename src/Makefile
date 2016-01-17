@@ -2,7 +2,7 @@ CFLAGS=-Werror -Wall -Os
 
 all: xvcd
 
-xvcd: gpio.o xvcd.o
+xvcd: serial_jtag.o xvcd.o
 	$(CC) -o $@ $^ $(CFLAGS)
 
 test: serial_jtag.o test.o
