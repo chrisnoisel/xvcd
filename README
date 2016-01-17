@@ -1,5 +1,5 @@
 This is a daemon that listens to "xilinx_xvc" (xilinx virtual cable) traffic and 
-operates JTAG over GPIOs.
+operates JTAG over a CP2102 usb to serial chip.
 
 Based on Felix Domke's work this xvc server uses serial port as output (because I'm cheap).
 
