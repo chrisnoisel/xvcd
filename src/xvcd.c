@@ -10,6 +10,8 @@
 //#include "gpio.h"
 #include "serial_jtag.h"
 
+#define DEFAULT_DEVICE "/dev/ttyS0"
+
 static int jtag_state;
 static int verbose;
 
@@ -186,26 +188,33 @@ int main(int argc, char **argv)
 	int s;
 	int c;
 	struct sockaddr_in address;
+	char *device = NULL;
 	
 	opterr = 0;
 	
-	while ((c = getopt(argc, argv, "v")) != -1)
+	while ((c = getopt(argc, argv, "vd:")) != -1)
 		switch (c)
 		{
+		case 'd':
+			device = optarg;
+			break;
 		case 'v':
 			verbose = 1;
 			break;
 		case '?':
-			fprintf(stderr, "usage: %s [-v]\n", *argv);
+			fprintf(stderr, "usage: %s [-v] [-d <serial_device>]\n", *argv);
 			return 1;
 		}
 	
+	if(device == NULL)
+		device = DEFAULT_DEVICE;
+
 	//
 	// Initialize GPIOs (mapping them into the process, 
 	// re-setting alternate functions, making input/outputs).
 	//
 	
-	int jtag = serial_jtag_open("/dev/ttyUSB0");
+	int jtag = serial_jtag_open(device);
 	
 	//
 	// Listen on port 2542.

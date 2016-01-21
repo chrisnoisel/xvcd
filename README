@@ -11,9 +11,3 @@ TCK - TX
 TMS - DTR
 
 The daemon listens on port 2542, and multiplexes between multiple connections.
-
---
-
-I've tested Impact FPGA Programming, IDCODE looping, and Chipscope.
-
-Have fun!

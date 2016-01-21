@@ -26,11 +26,8 @@ int main(int argc, char **argv)
 //		set_TDI(jtag, count&1);
 //		set_TMS(jtag, (count+1)%2);
 		//set_TMS_TDI(jtag, count%2, (count+1)%2);
-
 		get_TDO_set_TMS_TDI(jtag, count%2, (count+1)%2);
-
 		pulse_TCK(jtag);
-
 		count++;
 	}
 

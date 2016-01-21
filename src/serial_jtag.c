@@ -12,9 +12,7 @@
 #include <termios.h>
 #include "serial_jtag.h"
 
-
 #define BAUDRATE B115200
-
 #define PULSE 0xfc
 
 int serial_jtag_open(char *device)
