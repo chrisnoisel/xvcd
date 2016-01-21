@@ -13,7 +13,7 @@
 #include "serial_jtag.h"
 
 
-#define BAUDRATE B1152000
+#define BAUDRATE B115200
 
 #define PULSE 0xfc
 
@@ -138,7 +138,9 @@ int get_TDO_set_TMS_TDI(int fd, int state_TMS, int state_TDI)
 int pulse_TCK(int fd)
 {
 	char write_buffer[] = {PULSE};
-	return (int) write(fd, write_buffer, sizeof(write_buffer));
+	int out = write(fd, write_buffer, sizeof(write_buffer));
+	usleep(50); // roughly the time needed for sending the pulse
+	return out;
 }
 
 int get_TDO(int fd)

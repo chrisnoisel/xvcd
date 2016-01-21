@@ -22,7 +22,6 @@ int main(int argc, char **argv)
 
 	for(;;)
 	{
-		usleep(800);
 //		get_TDO(jtag);
 //		set_TDI(jtag, count&1);
 //		set_TMS(jtag, (count+1)%2);

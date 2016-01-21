@@ -157,9 +157,7 @@ int handle_data(int fd, int jtag)
 				
 				int tms = !!(buffer[i/8] & (1<<(i&7)));
 				int tdi = !!(buffer[nr_bytes + i/8] & (1<<(i&7)));
-				result[i / 8] |= get_TDO(jtag) << (i&7);
-				set_TMS(jtag, tms);
-				set_TDI(jtag, tdi);
+				result[i / 8] |= get_TDO_set_TMS_TDI(jtag, tms, tdi) << (i&7);
 				pulse_TCK(jtag);
 				
 				//
